@@ -114,7 +114,15 @@ app.add_middleware(
 
 # Global model variable (loaded on startup)
 model_obj = None
-device = 'cpu'
+
+# Device detection - default to CPU for stability, allow override via environment variable
+if os.environ.get('DEVICE'):
+    device = os.environ.get('DEVICE')
+    print(f"📱 Using device from environment: {device}")
+else:
+    # Default to CPU for stability (can be overridden to 'cuda:0' if needed)
+    device = 'cpu'
+    print(f"📱 Using CPU (set DEVICE=cuda:0 environment variable to use GPU)")
 
 
 # Pydantic models for request bodies
@@ -203,9 +211,17 @@ def load_model(model_path: Optional[str] = None):
     neural_network = TCN(device)
     model_obj = Model(n_concat=n_concat, device=device, nn=neural_network)
     model_obj.load_model(model_path)
+    
+    # CRITICAL: Explicitly move model to the correct device
+    # This ensures models saved on GPU are properly moved to CPU
+    model_obj.to(device)
     model_obj.nn.eval()
     
-    print(f"✅ Model loaded successfully")
+    # Ensure all parameters are on the correct device and disable gradients
+    for param in model_obj.nn.parameters():
+        param.requires_grad = False
+    
+    print(f"✅ Model loaded successfully on device: {device}")
 
 
 def predict_voice_from_audio(audio_path: str) -> dict:
@@ -241,6 +257,16 @@ def predict_voice_from_audio(audio_path: str) -> dict:
         
         audio_batch = audio.reshape(1, -1)
         mfcc_features = mfcc_extractor(audio_batch)[0]
+        
+        # Ensure MFCC features are numpy array (CPU) or convert if needed
+        if isinstance(mfcc_features, torch.Tensor):
+            # Convert tensor to numpy if on wrong device
+            if mfcc_features.device.type != 'cpu':
+                mfcc_features = mfcc_features.cpu().numpy()
+            else:
+                mfcc_features = mfcc_features.numpy()
+        elif not isinstance(mfcc_features, np.ndarray):
+            mfcc_features = np.array(mfcc_features)
         
         # Prepare data for model
         mfcc_list = [mfcc_features]
