@@ -44,13 +44,30 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 
-# Add azrt2021 to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'azrt2021'))
+# Add current directory and azrt2021 to path for proper module resolution
+# This ensures imports work regardless of where Python is run from
+current_dir = os.path.dirname(os.path.abspath(__file__))
+azrt2021_dir = os.path.join(current_dir, 'azrt2021')
 
-from azrt2021.model import Model
-from azrt2021.tcn import TCN
-from preprocess_audio import load_audio_file
-from azrt2021.mfcc import MFCC_Extractor
+# Add directories to path if not already there
+for path_dir in [current_dir, azrt2021_dir]:
+    if path_dir not in sys.path:
+        sys.path.insert(0, path_dir)
+
+# Import modules with error handling
+try:
+    from azrt2021.model import Model
+    from azrt2021.tcn import TCN
+    from preprocess_audio import load_audio_file
+    from azrt2021.mfcc import MFCC_Extractor
+except ImportError as e:
+    print(f"❌ Import Error: {e}")
+    print(f"Current directory: {current_dir}")
+    print(f"azrt2021 directory: {azrt2021_dir}")
+    print(f"Python path: {sys.path[:5]}")  # Show first 5 paths
+    print(f"Files in current_dir: {os.listdir(current_dir) if os.path.exists(current_dir) else 'NOT FOUND'}")
+    print(f"Files in azrt2021_dir: {os.listdir(azrt2021_dir) if os.path.exists(azrt2021_dir) else 'NOT FOUND'}")
+    raise
 
 app = FastAPI(
     title="Voice Dementia Detection API",

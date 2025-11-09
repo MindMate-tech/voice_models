@@ -12,9 +12,16 @@ from torch.utils import data
 from torch.utils.data import WeightedRandomSampler
 from tqdm import tqdm
 
-from tcn import TCN
-from data import collate_fn
-from misc import calc_performance_metrics, show_performance_metrics
+# Use relative imports to avoid module resolution issues
+try:
+    from .tcn import TCN
+    from .data import collate_fn
+    from .misc import calc_performance_metrics, show_performance_metrics
+except ImportError:
+    # Fallback to absolute imports if relative imports fail
+    from azrt2021.tcn import TCN
+    from azrt2021.data import collate_fn
+    from azrt2021.misc import calc_performance_metrics, show_performance_metrics
 
 class Model:
     """
