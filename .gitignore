@@ -1,0 +1,38 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Training data - NOT needed for deployment
+data/
+nodementia/
+data/mfcc_features/
+azrt2021/results/
+
+# Model files (if using external storage like Supabase)
+# Uncomment if storing model externally:
+# azrt2021/pt_files/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+

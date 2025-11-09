@@ -1,0 +1,5 @@
+idtype,id,mfcc_npy_files,is_demented_at_recording
+FHS,0001,"['data/mfcc_features/patient_001_audio1.npy', 'data/mfcc_features/patient_001_audio2.npy']",0
+FHS,0002,"['data/mfcc_features/patient_002_audio1.npy']",1
+FHS,0003,"['data/mfcc_features/patient_003_audio1.npy', 'data/mfcc_features/patient_003_audio2.npy', 'data/mfcc_features/patient_003_audio3.npy']",0
+

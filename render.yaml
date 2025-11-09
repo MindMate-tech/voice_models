@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: voice-dementia-detection-api
+    env: python
+    # If your repo root is voice_model, remove rootDir line below
+    # If your repo has voice_model folder, keep rootDir: voice_model
+    rootDir: voice_model
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    plan: free
+    # Health check endpoint
+    healthCheckPath: /health

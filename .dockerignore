@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Model files (if large, consider excluding and using external storage)
+# azrt2021/pt_files/
+
+# Data files (exclude large data files)
+data/
+nodementia/
+
+# Results
+azrt2021/results/
+
+# Git
+.git/
+.gitignore
+
+# Documentation (optional, can include if small)
+# *.md
+
+# Deployment files
+render.yaml
+railway.json
+Procfile

@@ -1,0 +1,51 @@
+# Training data - NOT needed for deployment
+data/
+nodementia/
+
+# MFCC features from training - NOT needed
+data/mfcc_features/
+
+# Training results - NOT needed
+azrt2021/results/
+
+# CSV files with training data - NOT needed
+data/csv_files/
+csv_files/
+
+# Training scripts (optional - can exclude if you want)
+# azrt2021/train.py
+# convert_all_data.py
+# auto_convert_audio.py
+
+# Virtual environment - NOT needed
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyc
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Documentation (optional - can include if small)
+# *.md
+
+# Git
+.git/
+.gitignore
+
+# Model files (if using external storage)
+# azrt2021/pt_files/
+
