@@ -16,6 +16,27 @@ import sys
 # CRITICAL: Set up Python path FIRST, before any other imports
 # This fixes the "No module named 'src'" error on Render
 current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# CRITICAL: Remove parent 'src' directory from Python path to prevent import errors
+# Render deploys to /opt/render/project/src/voice_model/
+# We keep /opt/render/project/src/voice_model/ but remove /opt/render/project/src/
+# This prevents Python from trying to import 'src' as a module
+filtered_path = []
+for p in sys.path:
+    # Keep the current directory (voice_model) even if it contains 'src' in the path
+    if p == current_dir:
+        filtered_path.append(p)
+    # Keep paths that don't contain 'src'
+    elif 'src' not in p:
+        filtered_path.append(p)
+    # Remove paths that end with 'src' (these would cause 'src' module import errors)
+    elif not p.endswith('src') and not p.endswith('src/'):
+        # Only keep if it's related to our current directory
+        if current_dir in p or p in current_dir:
+            filtered_path.append(p)
+sys.path = filtered_path
+
+# Add current directory to Python path (MUST be first)
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
@@ -55,10 +76,11 @@ import uvicorn
 # current_dir is already set above and added to sys.path
 azrt2021_dir = os.path.join(current_dir, 'azrt2021')
 
-# Add directories to path if not already there
-for path_dir in [current_dir, azrt2021_dir]:
-    if path_dir not in sys.path:
-        sys.path.insert(0, path_dir)
+# Add azrt2021 directory to path if not already there
+# NOTE: We only add current_dir and azrt2021_dir, NOT parent directories
+# This prevents Python from trying to import 'src' as a module
+if azrt2021_dir not in sys.path and os.path.exists(azrt2021_dir):
+    sys.path.insert(0, azrt2021_dir)
 
 # Import modules with error handling
 try:

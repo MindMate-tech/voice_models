@@ -15,14 +15,37 @@ def setup_environment():
     # Change to the script's directory (CRITICAL for Render)
     os.chdir(current_dir)
     
-    # Add current directory to Python path (MUST be first)
+    # CRITICAL: Remove any parent 'src' directory from Python path
+    # Render deploys to /opt/render/project/src/voice_model/
+    # We want to keep /opt/render/project/src/voice_model/ but remove /opt/render/project/src/
+    # This prevents Python from trying to import 'src' as a module
+    filtered_path = []
+    for p in sys.path:
+        # Keep the current directory (voice_model) even if it contains 'src' in the path
+        if p == current_dir:
+            filtered_path.append(p)
+        # Keep paths that don't contain 'src'
+        elif 'src' not in p:
+            filtered_path.append(p)
+        # Remove paths that end with 'src' or have 'src' as a parent directory
+        # (these would cause Python to try to import 'src' as a module)
+        elif not p.endswith('src') and not p.endswith('src/'):
+            # Only keep if it's a subdirectory of our current_dir
+            if current_dir in p or p in current_dir:
+                filtered_path.append(p)
+    sys.path = filtered_path
+    
+    # Add current directory to Python path (MUST be first and ONLY the voice_model dir)
     if current_dir not in sys.path:
         sys.path.insert(0, current_dir)
     
-    # Also add parent directory in case Render has weird path structure
-    parent_dir = os.path.dirname(current_dir)
-    if parent_dir not in sys.path and os.path.exists(parent_dir):
-        sys.path.insert(0, parent_dir)
+    # Add azrt2021 subdirectory to path
+    azrt2021_dir = os.path.join(current_dir, 'azrt2021')
+    if azrt2021_dir not in sys.path and os.path.exists(azrt2021_dir):
+        sys.path.insert(0, azrt2021_dir)
+    
+    # IMPORTANT: Do NOT add parent directory - it contains 'src' which causes import errors
+    # The rootDir setting in render.yaml should handle the working directory
     
     return current_dir
 
@@ -53,9 +76,20 @@ def print_diagnostics(current_dir):
     print(f"Script directory: {current_dir}")
     print(f"Python version: {sys.version}")
     print(f"Python executable: {sys.executable}")
-    print(f"Python path (first 5):")
-    for i, path in enumerate(sys.path[:5], 1):
-        print(f"  {i}. {path}")
+    print(f"Python path (filtered to remove 'src' references):")
+    for i, path in enumerate(sys.path[:10], 1):
+        # Highlight if path contains 'src' (which we want to avoid)
+        marker = " ⚠️  (contains 'src')" if 'src' in path and path != current_dir else ""
+        print(f"  {i}. {path}{marker}")
+    print()
+    
+    # Check if we're in the right place (should be in voice_model, not src)
+    if 'src' in current_dir and current_dir.endswith('voice_model'):
+        print("✅ Correctly in voice_model directory (even though path contains 'src')")
+    elif 'src' not in current_dir:
+        print("✅ Path doesn't contain 'src' - good!")
+    else:
+        print("⚠️  Warning: Path structure might be incorrect")
     print()
     
     # Check if api.py exists and is readable
