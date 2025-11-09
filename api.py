@@ -12,6 +12,13 @@ Usage:
 
 import os
 import sys
+
+# CRITICAL: Set up Python path FIRST, before any other imports
+# This fixes the "No module named 'src'" error on Render
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 import tempfile
 from pathlib import Path
 from typing import Optional
@@ -44,9 +51,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 
-# Add current directory and azrt2021 to path for proper module resolution
-# This ensures imports work regardless of where Python is run from
-current_dir = os.path.dirname(os.path.abspath(__file__))
+# Add azrt2021 to path for proper module resolution
+# current_dir is already set above and added to sys.path
 azrt2021_dir = os.path.join(current_dir, 'azrt2021')
 
 # Add directories to path if not already there
