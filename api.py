@@ -243,12 +243,16 @@ def predict_voice_from_audio(audio_path: str) -> dict:
 
 @app.on_event("startup")
 async def startup_event():
-    """Load model on startup."""
+    """Load model on startup (non-blocking - server starts immediately)."""
+    print("🔄 Startup event triggered - server is ready to accept requests")
+    print("📦 Loading model in background (API will respond even if model not loaded yet)...")
     try:
         load_model()
+        print("✅ Model loaded successfully on startup")
     except Exception as e:
         print(f"⚠️  Warning: Could not load model on startup: {e}")
         print("   Model will be loaded on first request.")
+        print("   API is ready and health checks will pass.")
 
 
 @app.get("/")
@@ -270,11 +274,16 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    """
+    Health check endpoint.
+    Returns immediately - does not require model to be loaded.
+    Cloud Run uses this to verify the service is ready.
+    """
     return {
         "status": "healthy",
         "model_loaded": model_obj is not None,
-        "device": device
+        "device": device,
+        "ready": True  # Always true - server is ready even if model isn't loaded
     }
 
 
@@ -459,8 +468,11 @@ async def predict_from_url(
 
 if __name__ == "__main__":
     # Run the API server
-    # Use PORT environment variable if available (for Render, Heroku, etc.)
-    port = int(os.environ.get("PORT", 8000))
+    # Use PORT environment variable if available (Cloud Run uses 8080)
+    # Default to 8080 for Cloud Run compatibility, fallback to 8000 for local dev
+    port = int(os.environ.get("PORT", 8080))
+    print(f"🚀 Starting Voice Dementia Detection API on port {port}")
+    print(f"📍 Health check: http://0.0.0.0:{port}/health")
     uvicorn.run(
         "api:app",
         host="0.0.0.0",

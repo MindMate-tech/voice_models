@@ -22,13 +22,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Expose port (will be overridden by platform)
-EXPOSE 8000
+# Make startup script executable
+RUN chmod +x start_server.sh
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
+# Expose port (Cloud Run uses 8080, but this is informational)
+# The actual port is determined by the PORT environment variable
+EXPOSE 8080
 
-# Run the application
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+# Health check - uses PORT environment variable (Cloud Run sets this to 8080)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD python -c "import os, requests; port = os.environ.get('PORT', '8080'); requests.get(f'http://localhost:{port}/health', timeout=5)" || exit 1
+
+# Run the application using startup script
+# The script handles PORT environment variable (Cloud Run sets this to 8080)
+CMD ["./start_server.sh"]
 
